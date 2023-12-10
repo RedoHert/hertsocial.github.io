@@ -1,67 +1,304 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Pesquisa Wikipédia</title>
-  <style>
-    
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #000000;
-      
-    }
+    <meta charset="UTF-8">
+    <title>Rede Social</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
 
-    .container {
-      text-align: center;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-    h1 {
-      color: #333;
-    }
+        #registerForm,
+        #loginForm,
+        #socialContent {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      margin-top: 20px;
-      text-decoration: none;
-      color: #fff;
-      background-color: #000000;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
 
-    .btn:hover {
-      background-color: #8b0000;
-    }
-    
-    
-  </style>
+        input[type="text"],
+        input[type="password"],
+        textarea,
+        input[type="file"] {
+            width: calc(100% - 10px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #posts {
+            margin-top: 20px;
+        }
+
+        .post-container {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-container img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .post-container p {
+            margin: 0;
+        }
+
+        .post-container button {
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .post-container button:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
-  
-  <div class="container">
-    <h1>Pesquisa Wikipédia</h1>
-    <p>Feito por RedoHert!</p>
-    <a href="https://drive.google.com/uc?export=download&id=1zWe9bz--V9wiPRhqHogYjH_PEhOgGQ2P" download="nome_do_programa" class="btn">Download ou atualizar</a>
-<div style="color: black; font-size: 20px; font-family: Arial; font-weight: 400; word-wrap: break-word">(v0.3b)</div>
-<div class="label" style="background-color: red; border-radius: 10px; font-size: 10px;">
-  <p class="if-you-get-an" style="color: white;">
-    If you get an antivirus warning, don’t worry, the program is<br />totally safe and our source-code is available
-    on github
-  </p>
-</div>
+    <h1>Hert Social 🌐</h1>
+    
+    <div id="registerForm" style="display: none;">
+        <h2>Criar Nova Conta</h2>
+        <label for="newUsername">Username:</label>
+        <input type="text" id="newUsername">
+        <label for="newPassword">Password:</label>
+        <input type="password" id="newPassword">
+        <button onclick="register()">Registrar</button>
+        <p>Já tem uma conta? <a href="#" onclick="showLoginForm()">Faça login</a></p>
+    </div>
 
+    <div id="loginForm">
+        <h2>Login</h2>
+        <label for="usernameInput">Username:</label>
+        <input type="text" id="usernameInput">
+        <label for="passwordInput">Password:</label>
+        <input type="password" id="passwordInput">
+        <button onclick="login()">Login</button>
+        <p>Não tem uma conta? <a href="#" onclick="showRegisterForm()">Registre-se</a></p>
+    </div>
+    
+    <div id="socialContent" style="display: none;">
+        <div>
+            <label for="loggedInUser">Username:</label>
+            <span id="loggedInUser"></span>
+        </div>
+        <div>
+            <label for="userProfilePic">Foto de perfil:</label>
+            <input type="file" accept="image/*" id="userProfilePicInput">
+            <button onclick="uploadProfilePic()">Upload</button>
+            <img id="userProfilePic" alt="Foto de perfil" style="width: 50px; height: 50px; border-radius: 50%;">
+        </div>
+        <textarea id="postContent" placeholder="Digite seu post"></textarea>
+        <button onclick="criarPost()">Criar Post</button>
+        <button onclick="logout()" style="background-color: red; color: white;">Logout</button>
+            
+        <div id="posts"></div>
+    </div>
 
-  </div>
+    <script>
+        function isAuthenticated() {
+            var storedUsername = localStorage.getItem('username');
+            var loggedInUser = document.getElementById('loggedInUser').textContent;
+    
+            return storedUsername === loggedInUser;
+        }
+    
+        function uploadProfilePic() {
+            if (isAuthenticated()) {
+                var fileInput = document.getElementById('userProfilePicInput');
+                var file = fileInput.files[0];
+                
+                var reader = new FileReader();
+                reader.onload = function(event) {
+                    var imgBase64 = event.target.result;
+                    document.getElementById('userProfilePic').src = imgBase64;
+    
+                    var loggedInUser = document.getElementById('loggedInUser').textContent;
+                    localStorage.setItem('profilePic_' + loggedInUser, imgBase64);
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                alert('Você não está autenticado para fazer isso.');
+            }
+        }
+    
+        function mostrarPosts() {
+            var postsContainer = document.getElementById('posts');
+            postsContainer.innerHTML = '';
+
+            var posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+            for (var i = 0; i < posts.length; i++) {
+                var post = posts[i];
+                var postElement = document.createElement('div');
+                postElement.className = 'post-container';
+                postElement.innerHTML = '<div>' +
+                    '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
+                    '<p><strong>' + post.username + '</strong> em ' + post.date + '<br>' + post.content;
+
+                if (isAuthenticated() && post.username === document.getElementById('loggedInUser').textContent) {
+                    postElement.innerHTML += '<button onclick="deletarPost(' + i + ')">Excluir</button>';
+                }
+
+                postElement.innerHTML += '</p></div>';
+                postsContainer.appendChild(postElement);
+            }
+        }
+
+        function criarPost() {
+            var username = document.getElementById('loggedInUser').textContent;
+            var profilePic = localStorage.getItem('profilePic_' + username) || '';
+            var postContent = document.getElementById('postContent').value;
+            // Adicione a seguinte linha para notificar outros usuários
+            document.dispatchEvent(new Event('novosPosts'));
+            if (postContent.trim() !== '') {
+                var post = {
+                    username: username,
+                    profilePic: profilePic,
+                    content: postContent,
+                    date: new Date().toLocaleString()
+                };
+
+                var posts = JSON.parse(localStorage.getItem('posts')) || [];
+                posts.unshift(post);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                mostrarPosts();
+            } else {
+                alert('Por favor, insira um conteúdo para o post.');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('username');
+            document.getElementById('loggedInUser').textContent = '';
+            showLoginForm();
+        }
+
+        function login() {
+            var usernameInput = document.getElementById('usernameInput').value;
+            var passwordInput = document.getElementById('passwordInput').value;
+
+            var storedPassword = localStorage.getItem(usernameInput);
+
+            if (storedPassword && passwordInput === storedPassword) {
+                localStorage.setItem('username', usernameInput);
+                showSocialContent();
+                document.getElementById('loggedInUser').textContent = usernameInput;
+                mostrarPosts();
+            } else {
+                alert('Usuário ou senha incorretos.');
+            }
+        }
+
+        function register() {
+            var newUsername = document.getElementById('newUsername').value;
+            var newPassword = document.getElementById('newPassword').value;
+
+            if (!localStorage.getItem(newUsername)) {
+                localStorage.setItem(newUsername, newPassword);
+                alert('Registro bem-sucedido! Faça login com sua nova conta.');
+                showLoginForm();
+            } else {
+                alert('Este usuário já existe. Escolha outro nome de usuário.');
+            }
+        }
+
+          // Essa função será chamada quando houver novos posts
+          document.addEventListener('novosPosts', mostrarPosts);
+
+        function showRegisterForm() {
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('socialContent').style.display = 'none';
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('socialContent').style.display = 'none';
+        }
+
+        function showSocialContent() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('socialContent').style.display = 'block';
+        }
+
+        function deletarPost(index) {
+        if (isAuthenticated()) {
+            var posts = JSON.parse(localStorage.getItem('posts')) || [];
+            var post = posts[index];
+
+            if (post.username === localStorage.getItem('username')) {
+                posts.splice(index, 1);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                mostrarPosts();
+            } else {
+                alert('Você não tem permissão para excluir este post.');
+            }
+        } else {
+            alert('Você não está autenticado para fazer isso.');
+        }
+    }
+        // Esta função é chamada para verificar regularmente por novos posts
+        function verificarNovosPosts() {
+            setInterval(function() {
+                var lastPosts = JSON.parse(localStorage.getItem('lastPosts')) || [];
+                var currentPosts = JSON.parse(localStorage.getItem('posts')) || [];
+
+                if (JSON.stringify(lastPosts) !== JSON.stringify(currentPosts)) {
+                    document.dispatchEvent(new Event('novosPosts'));
+                    localStorage.setItem('lastPosts', JSON.stringify(currentPosts));
+                }
+            }, 3000); // Verificar a cada 3 segundos se há novos posts
+        }
+
+        verificarNovosPosts();
+        mostrarPosts();
+    </script>
 </body>
 </html>
