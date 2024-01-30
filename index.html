@@ -192,7 +192,6 @@
             var username = document.getElementById('loggedInUser').textContent;
             var profilePic = localStorage.getItem('profilePic_' + username) || '';
             var postContent = document.getElementById('postContent').value;
-            // Adicione a seguinte linha para notificar outros usuários
             document.dispatchEvent(new Event('novosPosts'));
             if (postContent.trim() !== '') {
                 var post = {
@@ -247,7 +246,7 @@
             }
         }
 
-          // Essa função será chamada quando houver novos posts
+       
           document.addEventListener('novosPosts', mostrarPosts);
 
         function showRegisterForm() {
@@ -284,7 +283,7 @@
             alert('Você não está autenticado para fazer isso.');
         }
     }
-        // Esta função é chamada para verificar regularmente por novos posts
+  
         function verificarNovosPosts() {
             setInterval(function() {
                 var lastPosts = JSON.parse(localStorage.getItem('lastPosts')) || [];
@@ -294,7 +293,7 @@
                     document.dispatchEvent(new Event('novosPosts'));
                     localStorage.setItem('lastPosts', JSON.stringify(currentPosts));
                 }
-            }, 3000); // Verificar a cada 3 segundos se há novos posts
+            }, 3000); 
         }
 
         verificarNovosPosts();
