@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hert Social</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -65,12 +66,27 @@
         button:hover {
             background-color: #8e44ad;
         }
+        
+
 
         #posts {
             margin-top: 20px;
         }
+        .delete-button {
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
 
         .post-container {
+            position: relative;
             background-color: #34495e;
             border: 1px solid #7f8c8d;
             padding: 10px;
@@ -163,12 +179,12 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-        function isAuthenticated() {
-            var storedUsername = localStorage.getItem('username');
-            var loggedInUser = document.getElementById('loggedInUser').textContent;
-    
-            return storedUsername === loggedInUser;
-        }
+    function isAuthenticated() {
+    var user = firebase.auth().currentUser;
+    return user !== null;
+}
+
+
     
         function uploadProfilePic() {
             if (isAuthenticated()) {
@@ -191,31 +207,27 @@
         }
     
         function mostrarPosts() {
-    var postsContainer = document.getElementById('posts');
-    postsContainer.innerHTML = '';
+            var postsContainer = document.getElementById('posts');
+            postsContainer.innerHTML = '';
 
-    const db = firebase.database();
-    const postsRef = db.ref('posts');
+            const db = firebase.database();
+            const postsRef = db.ref('posts');
 
-    postsRef.on('value', function(snapshot) {
-        snapshot.forEach(function(childSnapshot) {
-            var post = childSnapshot.val();
-            var postElement = document.createElement('div');
-            postElement.className = 'post-container';
-            postElement.innerHTML = '<div>' +
-                '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
-                '<p><strong>' + post.username + '</strong> em ' + post.date + '<br>' + post.content;
+            postsRef.once('value', function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    var post = childSnapshot.val();
+                    var postElement = document.createElement('div');
+                    postElement.className = 'post-container';
+                    postElement.innerHTML = '<div>' +
+                        '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
+                        '<p><strong>' + post.username + '</strong> em ' + post.date + '<br>' + post.content + '</p>' +
+                        '<button class="delete-button" onclick="deletarPost(\'' + childSnapshot.key + '\')">Deletar</button>' +
+                        '</div>';
 
-            if (isAuthenticated() && post.username === document.getElementById('loggedInUser').textContent) {
-                postElement.innerHTML += '<button onclick="deletarPost(\'' + childSnapshot.key + '\')">Excluir</button>';
-            }
-
-            postElement.innerHTML += '</p></div>';
-            postsContainer.appendChild(postElement);
-        });
-    });
-}
-
+                    postsContainer.appendChild(postElement);
+                });
+            });
+        }
 function criarPost() {
     var username = document.getElementById('loggedInUser').textContent;
     var profilePic = localStorage.getItem('profilePic_' + username) || '';
@@ -326,17 +338,27 @@ function register() {
         const db = firebase.database();
         const postsRef = db.ref('posts');
 
-        postsRef.child(postKey).remove()
-            .then(function() {
-                mostrarPosts();
-            })
-            .catch(function(error) {
-                console.error('Erro ao excluir o post:', error);
-            });
+        postsRef.child(postKey).once('value', function(snapshot) {
+            var post = snapshot.val();
+            var loggedInUser = document.getElementById('loggedInUser').textContent;
+
+            if (post.username === loggedInUser) {
+                postsRef.child(postKey).remove()
+                    .then(function() {
+                        mostrarPosts();
+                    })
+                    .catch(function(error) {
+                        console.error('Erro ao excluir o post:', error);
+                    });
+            } else {
+                alert('Você não tem permissão para excluir este post.');
+            }
+        });
     } else {
         alert('Você não está autenticado para fazer isso.');
     }
 }
+
 
   
         function verificarNovosPosts() {
