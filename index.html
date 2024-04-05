@@ -196,6 +196,15 @@
     return user !== null;
 }
 
+        const postsRef = db.ref('posts');
+        postsRef.on('child_added', function(snapshot) {
+            mostrarPosts();
+        postsRef.on('child_removed', function(snapshot) {
+            mostrarPosts();
+        });
+
+        });
+
 
     
         function uploadProfilePic() {
@@ -245,6 +254,7 @@
         });
     });
 }
+
 
 function criarPost() {
     var username = document.getElementById('loggedInUser').textContent;
@@ -330,6 +340,14 @@ function register() {
         });
 }
 
+        function verificarNovosPosts() {
+            setInterval(function() {
+                // Faça uma requisição ao Firebase para obter os posts mais recentes
+                mostrarPosts();
+            }, 5000); // A cada 5 segundos
+        }
+
+
        
           document.addEventListener('novosPosts', mostrarPosts);
 
@@ -406,17 +424,7 @@ function ordenarPosts(ordem) {
 }
 
   
-        function verificarNovosPosts() {
-            setInterval(function() {
-                var lastPosts = JSON.parse(localStorage.getItem('lastPosts')) || [];
-                var currentPosts = JSON.parse(localStorage.getItem('posts')) || [];
 
-                if (JSON.stringify(lastPosts) !== JSON.stringify(currentPosts)) {
-                    document.dispatchEvent(new Event('novosPosts'));
-                    localStorage.setItem('lastPosts', JSON.stringify(currentPosts));
-                }
-            }, 3000); 
-        }
 
         verificarNovosPosts();
         mostrarPosts();
