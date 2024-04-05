@@ -170,7 +170,6 @@
         </div>
         <button onclick="criarPost()">Criar Post</button>
         <button onclick="logout()" style="background-color: red; color: white;">Logout</button>
-            
         <div id="posts"></div>
     </div>
     
@@ -226,8 +225,9 @@
                 alert('Você não está autenticado para fazer isso.');
             }
         }
-    
-        function mostrarPosts() {
+    var numMensagensExibidas = 0;
+
+    function mostrarPosts() {
     var postsContainer = document.getElementById('posts');
     postsContainer.innerHTML = '';
 
@@ -249,11 +249,93 @@
             posts.push(postElement);
         });
 
-        posts.reverse().forEach(function(post) {
+        numMensagensExibidas = posts.length;
+        var postsExibidos = posts.slice(Math.max(numMensagensExibidas - 20, 0));
+
+        postsExibidos.forEach(function(post) {
             postsContainer.appendChild(post);
         });
+
+        if (numMensagensExibidas > 20) {
+            var verMaisButton = document.createElement('button');
+            verMaisButton.textContent = 'Ver mais';
+            verMaisButton.onclick = function() {
+                mostrarMaisPosts(posts);
+            };
+            postsContainer.appendChild(verMaisButton);
+        }
     });
 }
+
+var start = 0;
+var limit = 20;
+var hideStart = limit;
+
+function mostrarPosts() {
+    var postsContainer = document.getElementById('posts');
+    postsContainer.innerHTML = '';
+
+    const db = firebase.database();
+    const postsRef = db.ref('posts');
+
+    postsRef.once('value', function(snapshot) {
+        var posts = [];
+        snapshot.forEach(function(childSnapshot) {
+            var post = childSnapshot.val();
+            var postElement = document.createElement('div');
+            postElement.className = 'post-container';
+            postElement.innerHTML = '<div>' +
+                '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
+                '<p><strong>' + post.username + '</strong> em <span class="post-date">' + post.date + '</span><br>' + post.content + '</p>' +
+                '<button class="delete-button" onclick="deletarPost(\'' + childSnapshot.key + '\')">Deletar</button>' +
+                '</div>';
+
+            posts.push(postElement);
+        });
+
+        posts.reverse().forEach(function(post, index) {
+            if (index >= start && index < start + limit) {
+                postsContainer.appendChild(post);
+            }
+        });
+
+        var buttonsContainer = document.createElement('div');
+        buttonsContainer.style.textAlign = 'center';
+
+        if (start + limit < posts.length) {
+            var verMaisButton = document.createElement('button');
+            verMaisButton.textContent = 'Ver Mais';
+            verMaisButton.onclick = function() {
+                start += limit;
+                mostrarPosts();
+                window.scrollTo(0, 0);
+            };
+            buttonsContainer.appendChild(verMaisButton);
+        }
+
+        var voltarParaTopoButton = document.createElement('button');
+        voltarParaTopoButton.textContent = 'Voltar para o Topo';
+        voltarParaTopoButton.onclick = function() {
+            start = 0;
+            mostrarPosts();
+            window.scrollTo(0, 0);
+        };
+        buttonsContainer.appendChild(voltarParaTopoButton);
+
+        postsContainer.appendChild(buttonsContainer);
+    });
+}
+
+
+function voltarParaTopo() {
+    mostrarPosts();
+}
+
+
+verificarNovosPosts();
+mostrarPosts();
+
+
 
 
 function criarPost() {
