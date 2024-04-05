@@ -67,6 +67,10 @@
             background-color: #8e44ad;
         }
         
+        #ordenacao {
+        text-align: right;
+        margin-top: 10px;
+        }
 
 
         #posts {
@@ -160,12 +164,20 @@
             <img id="userProfilePic" alt="Foto de perfil" style="width: 50px; height: 50px; border-radius: 50%;">
         </div>
         <textarea id="postContent" placeholder="Digite seu post"></textarea>
+        <div id="ordenacao" style="display: none; margin-top: 10px;">
+            <button onclick="ordenarPosts('maisRecente')">Mais recente</button>
+            <button onclick="ordenarPosts('maisAntigo')">Mais antigo</button>
+        </div>
         <button onclick="criarPost()">Criar Post</button>
         <button onclick="logout()" style="background-color: red; color: white;">Logout</button>
             
         <div id="posts"></div>
     </div>
+    
+    
 
+
+    
     <script>
      const firebaseConfig = {
         apiKey: "AIzaSyBuxQ5I2eYLq0VtYSItTv-I4C4wMQpGx3g",
@@ -207,27 +219,33 @@
         }
     
         function mostrarPosts() {
-            var postsContainer = document.getElementById('posts');
-            postsContainer.innerHTML = '';
+    var postsContainer = document.getElementById('posts');
+    postsContainer.innerHTML = '';
 
-            const db = firebase.database();
-            const postsRef = db.ref('posts');
+    const db = firebase.database();
+    const postsRef = db.ref('posts');
 
-            postsRef.once('value', function(snapshot) {
-                snapshot.forEach(function(childSnapshot) {
-                    var post = childSnapshot.val();
-                    var postElement = document.createElement('div');
-                    postElement.className = 'post-container';
-                    postElement.innerHTML = '<div>' +
-                        '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
-                        '<p><strong>' + post.username + '</strong> em ' + post.date + '<br>' + post.content + '</p>' +
-                        '<button class="delete-button" onclick="deletarPost(\'' + childSnapshot.key + '\')">Deletar</button>' +
-                        '</div>';
+    postsRef.once('value', function(snapshot) {
+        var posts = [];
+        snapshot.forEach(function(childSnapshot) {
+            var post = childSnapshot.val();
+            var postElement = document.createElement('div');
+            postElement.className = 'post-container';
+            postElement.innerHTML = '<div>' +
+                '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
+                '<p><strong>' + post.username + '</strong> em <span class="post-date">' + post.date + '</span><br>' + post.content + '</p>' +
+                '<button class="delete-button" onclick="deletarPost(\'' + childSnapshot.key + '\')">Deletar</button>' +
+                '</div>';
 
-                    postsContainer.appendChild(postElement);
-                });
-            });
-        }
+            posts.push(postElement);
+        });
+
+        posts.reverse().forEach(function(post) {
+            postsContainer.appendChild(post);
+        });
+    });
+}
+
 function criarPost() {
     var username = document.getElementById('loggedInUser').textContent;
     var profilePic = localStorage.getItem('profilePic_' + username) || '';
@@ -328,10 +346,18 @@ function register() {
         }
 
         function showSocialContent() {
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('socialContent').style.display = 'block';
-        }
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('socialContent').style.display = 'block';
+
+    var ordenacao = document.getElementById('ordenacao');
+    if (isAuthenticated()) {
+        ordenacao.style.display = 'block';
+    } else {
+        ordenacao.style.display = 'none';
+    }
+}
+
 
         function deletarPost(postKey) {
     if (isAuthenticated()) {
@@ -359,6 +385,25 @@ function register() {
     }
 }
 
+function ordenarPosts(ordem) {
+    var postsContainer = document.getElementById('posts');
+    var posts = Array.from(postsContainer.children);
+
+    posts.sort(function(a, b) {
+        var dataA = new Date(a.querySelector('.post-date').textContent);
+        var dataB = new Date(b.querySelector('.post-date').textContent);
+
+        if (ordem === 'maisRecente') {
+            return dataB - dataA;
+        } else {
+            return dataA - dataB;
+        }
+    });
+
+    posts.forEach(function(post) {
+        postsContainer.appendChild(post);
+    });
+}
 
   
         function verificarNovosPosts() {
