@@ -240,9 +240,8 @@
             var post = childSnapshot.val();
             var postElement = document.createElement('div');
             postElement.className = 'post-container';
-            var profilePic = post.profilePic || 'nopfp.jpg'; // Verifica se há uma foto de perfil, senão usa a padrão
             postElement.innerHTML = '<div>' +
-                '<img src="' + profilePic + '" alt="Foto de perfil">' +
+                '<img src="' + post.profilePic + '" alt="Foto de perfil">' +
                 '<p><strong>' + post.username + '</strong> em <span class="post-date">' + post.date + '</span><br>' + post.content + '</p>' +
                 '<button class="delete-button" onclick="deletarPost(\'' + childSnapshot.key + '\')">Deletar</button>' +
                 '</div>';
