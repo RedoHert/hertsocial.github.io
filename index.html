@@ -164,10 +164,6 @@
             <img id="userProfilePic" alt="Foto de perfil" style="width: 50px; height: 50px; border-radius: 50%;">
         </div>
         <textarea id="postContent" placeholder="Digite seu post"></textarea>
-        <div id="ordenacao" style="display: none; margin-top: 10px;">
-            <button onclick="ordenarPosts('maisRecente')">Mais recente</button>
-            <button onclick="ordenarPosts('maisAntigo')">Mais antigo</button>
-        </div>
         <button onclick="criarPost()">Criar Post</button>
         <button onclick="logout()" style="background-color: red; color: white;">Logout</button>
         <div id="posts"></div>
@@ -485,25 +481,7 @@ function register() {
     }
 }
 
-function ordenarPosts(ordem) {
-    var postsContainer = document.getElementById('posts');
-    var posts = Array.from(postsContainer.children);
 
-    posts.sort(function(a, b) {
-        var dataA = new Date(a.querySelector('.post-date').textContent);
-        var dataB = new Date(b.querySelector('.post-date').textContent);
-
-        if (ordem === 'maisRecente') {
-            return dataB - dataA;
-        } else {
-            return dataA - dataB;
-        }
-    });
-
-    posts.forEach(function(post) {
-        postsContainer.appendChild(post);
-    });
-}
 
   
 
