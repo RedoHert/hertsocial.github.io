@@ -347,15 +347,14 @@ function criarPost() {
             date: new Date().toLocaleString()
         };
 
-        // Salva o post no Firebase Realtime Database
         const db = firebase.database();
         const postsRef = db.ref('posts');
         postsRef.push(post);
 
-        // Limpa o campo de texto após a criação do post
+     
         document.getElementById('postContent').value = '';
 
-        // Mostra os posts atualizados
+       
         mostrarPosts();
     } else {
         alert('Por favor, insira um conteúdo para o post.');
@@ -373,7 +372,7 @@ function criarPost() {
     var username = document.getElementById('usernameInput').value;
     var password = document.getElementById('passwordInput').value;
 
-    // Adicionando um sufixo fictício de e-mail
+   
     var email = username + '@example.com';
 
     firebase.auth().signInWithEmailAndPassword(email, password)
@@ -402,16 +401,16 @@ function register() {
     if (password.length < 6) {
         document.getElementById('registerError').textContent = 'A senha deve ter pelo menos 6 letras.';
         document.getElementById('registerError').style.display = 'block';
-        return; // Impede que o registro prossiga
+        return;
     }
 
-    // Adicionando um sufixo fictício de e-mail
+    
     var email = username + '@example.com';
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             console.log('Usuário registrado com sucesso:', userCredential.user.uid);
-            showLoginForm(); // Redireciona para o formulário de login após o registro
+            showLoginForm();
         })
         .catch((error) => {
             console.error('Erro ao registrar usuário:', error.message);
@@ -420,9 +419,9 @@ function register() {
 
         function verificarNovosPosts() {
             setInterval(function() {
-                // Faça uma requisição ao Firebase para obter os posts mais recentes
+                
                 mostrarPosts();
-            }, 5000); // A cada 5 segundos
+            }, 5000); 
         }
 
 
